@@ -1,23 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { BookOpen } from 'lucide-react';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex items-center gap-3">
+            <BookOpen className="w-8 h-8 text-amber-600" />
+            <h1 className="text-3xl font-bold text-gray-800">My Journal</h1>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
