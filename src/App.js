@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus } from 'lucide-react';
 
 function App() {
@@ -11,6 +11,14 @@ function App() {
     date: '' 
   }); // The entry being written/edited right now
   const [view, setView] = useState('write'); // Are we in 'write' mode or 'list' mode?
+
+  // Load entries when app first loads
+  React.useEffect(() => {
+    const savedEntries = localStorage.getItem('journalEntries');
+    if (savedEntries) {
+      setEntries(JSON.parse(savedEntries));
+    }
+  }, []); // The empty [] means "only run this once when app loads"
 
   //functions to save an entry
   const saveEntry = () => {
@@ -113,6 +121,43 @@ function App() {
               className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 mt-4">
               Save Entry
             </button>
+          </div>
+        )}
+        {/* List View - only shows when view === 'list' */}
+        {view === 'list' && (
+          <div>
+            {entries.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">
+                  No journal entries yet. Start writing!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {entries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+                  >
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                      {entry.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-3">
+                      {new Date(entry.date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    <p className="text-gray-600">
+                      {entry.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
