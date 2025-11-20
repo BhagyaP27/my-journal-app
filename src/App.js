@@ -25,15 +25,22 @@ function App() {
   });
   const[mode, setMode] = useState('journal');
 
-
-
-  // Load entries when app first loads
+  //Load entries and tasks when app first loads
   useEffect(() => {
+    // Load journalentries
     const savedEntries = localStorage.getItem('journalEntries');
     if (savedEntries) {
       setEntries(JSON.parse(savedEntries));
     }
-  }, []); // The empty [] me ans "only run this once when app loads"
+
+    // Load tasks
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+  }, []);
+
+
 
   // Function to save an entry
   const saveEntry = () => {
