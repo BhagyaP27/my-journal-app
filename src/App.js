@@ -54,9 +54,29 @@ function App() {
         </div>
 
         {/* We'll add the write and list views here next */}
+        {view === 'write' &&(
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <input
+              type="text"
+              value={currentEntry.title}
+              onChnage={{e} => setCurrentEntry({ ...currentEntry, title: e.target.value })}
+              placeholder="Entry Title"
+              className="w-full text-2xl font-bold mb-4 p-2 border-b border-gray-300 focus:outline-none"
+            />
+            <textarea
+              value={currentEntry.content}
+              onChange={e => setCurrentEntry({ ...currentEntry, content: e.target.value })}
+              placeholder="Write your thoughts for today"
+              classBane="w-full h-64 p-2 border border-gray-300 rounded-lg focus:outline-none"
+            />
+            <button className="flex items-center gap-2 bg-green-600 text-white px-6py-3 rounded-lg hover:bg-green-700 mt-4">
+              Save entry
+            </button>
       </div>
+        )};
     </div>
-  );
+    );
+  }
 }
 
 export default App;
