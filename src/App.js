@@ -12,6 +12,21 @@ function App() {
   }); // The entry being written/edited right now
   const [view, setView] = useState('write'); // Are we in 'write' mode or 'list' mode?
 
+  // Add task state
+  const[tasks, setTasks] = useState([]);
+  const [currentTask, setCurrentTask] = useState({
+    id: null,
+    title: ' ',
+    description: ' ',
+    completed: false,
+    priority: 'medium',
+    dueDate: ' ',
+    createdAt: ' '
+  });
+  const[mode, setMode] = useState('journal');
+
+
+
   // Load entries when app first loads
   useEffect(() => {
     const savedEntries = localStorage.getItem('journalEntries');
