@@ -12,7 +12,7 @@ function App() {
   });
   const [view, setView] = useState('write');
 
-  // NEW: Add task state
+  // Task state
   const [tasks, setTasks] = useState([]);
   const [currentTask, setCurrentTask] = useState({
     id: null,
@@ -158,7 +158,7 @@ function App() {
         <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-emerald-400" />
+              <BookOpen className={`w-8 h-8 ${mode === 'journal' ? 'text-emerald-400' : 'text-red-400'}`} />
               <h1 className="text-3xl font-bold text-white">
                 {mode === 'journal' ? 'My Journal' : 'My Tasks'}
               </h1>
@@ -180,7 +180,11 @@ function App() {
                 }
                 setView('write');
               }}
-              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/50"
+              className={`flex items-center gap-2 ${
+                mode === 'journal' 
+                  ? 'bg-emerald-600 hover:bg-emerald-500 hover:shadow-emerald-500/50' 
+                  : 'bg-red-600 hover:bg-red-500 hover:shadow-red-500/50'
+              } text-white px-4 py-2 rounded-lg transition-all shadow-lg`}
             >
               <Plus className="w-5 h-5" />
               {mode === 'journal' ? 'New Entry' : 'New Task'}
@@ -193,7 +197,7 @@ function App() {
               onClick={() => setMode('journal')}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 mode === 'journal'
-                  ? 'bg-blue-600 text-white shadow-lg'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/30'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
@@ -203,7 +207,7 @@ function App() {
               onClick={() => setMode('tasks')}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 mode === 'tasks'
-                  ? 'bg-blue-600 text-white shadow-lg'
+                  ? 'bg-red-600 text-white shadow-lg shadow-red-500/30'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
@@ -217,7 +221,9 @@ function App() {
               onClick={() => setView('write')}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 view === 'write'
-                  ? 'bg-emerald-600 text-white shadow-lg'
+                  ? mode === 'journal'
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'bg-red-600 text-white shadow-lg'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
@@ -227,7 +233,9 @@ function App() {
               onClick={() => setView('list')}
               className={`flex-1 py-2 rounded-lg transition-all ${
                 view === 'list'
-                  ? 'bg-emerald-600 text-white shadow-lg'
+                  ? mode === 'journal'
+                    ? 'bg-emerald-600 text-white shadow-lg'
+                    : 'bg-red-600 text-white shadow-lg'
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
             >
@@ -318,13 +326,174 @@ function App() {
           </>
         )}
 
-        {/* TASKS MODE - We'll add this next */}
+        {/* TASKS MODE */}
         {mode === 'tasks' && (
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-12 text-center">
-            <p className="text-gray-400 text-lg">
-              Task next
-            </p>
-          </div>
+          <>
+            {/* Add/Edit Task View */}
+            {view === 'write' && (
+              <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6">
+                <div className="mb-6">
+                  <input
+                    type="text"
+                    value={currentTask.title}
+                    onChange={(e) => setCurrentTask({ ...currentTask, title: e.target.value })}
+                    placeholder="Task title..."
+                    className="w-full text-2xl font-bold bg-transparent border-none outline-none mb-4 text-white placeholder-gray-500"
+                  />
+                  <div className="w-full h-px bg-gradient-to-r from-red-500/0 via-red-500/50 to-red-500/0 mb-6"></div>
+                  
+                  <textarea
+                    value={currentTask.description}
+                    onChange={(e) => setCurrentTask({ ...currentTask, description: e.target.value })}
+                    placeholder="Task description (optional)..."
+                    className="w-full h-32 bg-transparent border-none outline-none resize-none text-gray-300 placeholder-gray-600 leading-relaxed mb-6"
+                  />
+
+                  {/* Priority Selector */}
+                  <div className="mb-4">
+                    <label className="block text-gray-400 text-sm mb-2">Priority</label>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setCurrentTask({ ...currentTask, priority: 'high' })}
+                        className={`flex-1 py-2 rounded-lg transition-all ${
+                          currentTask.priority === 'high'
+                            ? 'bg-red-600 text-white shadow-lg'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        🔴 High
+                      </button>
+                      <button
+                        onClick={() => setCurrentTask({ ...currentTask, priority: 'medium' })}
+                        className={`flex-1 py-2 rounded-lg transition-all ${
+                          currentTask.priority === 'medium'
+                            ? 'bg-orange-600 text-white shadow-lg'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        🟠 Medium
+                      </button>
+                      <button
+                        onClick={() => setCurrentTask({ ...currentTask, priority: 'low' })}
+                        className={`flex-1 py-2 rounded-lg transition-all ${
+                          currentTask.priority === 'low'
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        🔵 Low
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Due Date */}
+                  <div className="mb-6">
+                    <label className="block text-gray-400 text-sm mb-2">Due Date (optional)</label>
+                    <input
+                      type="date"
+                      value={currentTask.dueDate}
+                      onChange={(e) => setCurrentTask({ ...currentTask, dueDate: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white outline-none focus:border-red-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={saveTask}
+                  className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-500 transition-all shadow-lg hover:shadow-red-500/50"
+                >
+                  <Save className="w-5 h-5" />
+                  Save Task
+                </button>
+              </div>
+            )}
+
+            {/* Task List View */}
+            {view === 'list' && (
+              <div>
+                {tasks.length === 0 ? (
+                  <div className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-12 text-center">
+                    <div className="text-6xl mb-4">✓</div>
+                    <p className="text-gray-400 text-lg">
+                      No tasks yet. Start adding some!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {tasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className={`bg-gray-800 border rounded-2xl shadow-2xl p-6 transition-all ${
+                          task.completed 
+                            ? 'border-gray-600 opacity-60' 
+                            : 'border-gray-700 hover:shadow-red-500/20 hover:border-red-500/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          {/* Checkbox */}
+                          <button
+                            onClick={() => toggleTaskComplete(task.id)}
+                            className={`mt-1 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
+                              task.completed
+                                ? 'bg-red-600 border-red-600'
+                                : 'border-gray-500 hover:border-red-500'
+                            }`}
+                          >
+                            {task.completed && <span className="text-white text-sm">✓</span>}
+                          </button>
+
+                          {/* Task Content */}
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className={`text-xl font-bold ${
+                                task.completed ? 'text-gray-500 line-through' : 'text-white'
+                              }`}>
+                                {task.title}
+                              </h3>
+                              
+                              {/* Priority Badge */}
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                task.priority === 'high' ? 'bg-red-600/20 text-red-400' :
+                                task.priority === 'medium' ? 'bg-orange-600/20 text-orange-400' :
+                                'bg-blue-600/20 text-blue-400'
+                              }`}>
+                                {task.priority === 'high' ? '🔴 High' :
+                                 task.priority === 'medium' ? '🟠 Medium' :
+                                 '🔵 Low'}
+                              </span>
+                            </div>
+
+                            {task.description && (
+                              <p className={`mb-3 ${
+                                task.completed ? 'text-gray-600' : 'text-gray-400'
+                              }`}>
+                                {task.description}
+                              </p>
+                            )}
+
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              {task.dueDate && (
+                                <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                              )}
+                              <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="text-red-500 hover:text-red-400 transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
       </div>
