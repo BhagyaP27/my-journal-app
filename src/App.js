@@ -80,6 +80,25 @@ function App() {
     setView('list');
   };
 
+  // Function to delete a journal entry
+  const deleteEntry = (entryId) => {
+    if (!window.confirm('Are you sure you want to delete this journal entry?')) return;
+    
+    const updatedEntries = entries.filter(e => e.id !== entryId);
+    localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
+    setEntries(updatedEntries);
+    
+    if (currentEntry.id === entryId) {
+      setCurrentEntry({ id: null, title: '', content: '', date: '' });
+    }
+  };
+
+  // Function to edit a journal entry
+  const editEntry = (entry) => {
+    setCurrentEntry(entry);
+    setView('write');
+  };
+
   // Function to save a task
   const saveTask = () => {
     // Validation
@@ -149,6 +168,12 @@ function App() {
     const updatedTasks = tasks.filter(t => t.id !== taskId);
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
+  };
+
+  // Function to edit a task
+  const editTask = (task) => {
+    setCurrentTask(task);
+    setView('write');
   };
 
   return (
@@ -301,11 +326,30 @@ function App() {
                     {entries.map((entry) => (
                       <div
                         key={entry.id}
-                        className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 hover:shadow-emerald-500/20 hover:border-emerald-500/50 transition-all cursor-pointer group"
+                        className="bg-gray-800 border border-gray-700 rounded-2xl shadow-2xl p-6 hover:shadow-emerald-500/20 hover:border-emerald-500/50 transition-all group"
                       >
-                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
-                          {entry.title}
-                        </h3>
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="text-xl font-bold text-white group-hover:text-emerald-400 transition-colors">
+                            {entry.title}
+                          </h3>
+                          
+                          {/* Edit and Delete Buttons */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => editEntry(entry)}
+                              className="text-emerald-500 hover:text-emerald-400 px-3 py-1 rounded-lg hover:bg-emerald-500/10 transition-colors text-sm"
+                            >
+                              ✏️ Edit
+                            </button>
+                            <button
+                              onClick={() => deleteEntry(entry.id)}
+                              className="text-red-500 hover:text-red-400 px-3 py-1 rounded-lg hover:bg-red-500/10 transition-colors text-sm"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        </div>
+                        
                         <p className="text-sm text-gray-500 mb-3">
                           {new Date(entry.date).toLocaleDateString('en-US', { 
                             weekday: 'long', 
@@ -473,19 +517,27 @@ function App() {
 
                             <div className="flex items-center gap-4 text-sm text-gray-500">
                               {task.dueDate && (
-                                <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                                <span>📅 Due: {new Date(task.dueDate).toLocaleDateString()}</span>
                               )}
                               <span>Created: {new Date(task.createdAt).toLocaleDateString()}</span>
                             </div>
                           </div>
 
-                          {/* Delete Button */}
-                          <button
-                            onClick={() => deleteTask(task.id)}
-                            className="text-red-500 hover:text-red-400 transition-colors"
-                          >
-                            🗑️
-                          </button>
+                          {/* Edit and Delete Buttons */}
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => editTask(task)}
+                              className="text-orange-500 hover:text-orange-400 transition-colors text-sm"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => deleteTask(task.id)}
+                              className="text-red-500 hover:text-red-400 transition-colors text-sm"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
