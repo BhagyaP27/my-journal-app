@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  journal-app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "3000:80"
+    container_name: my-journal-app
+    restart: unless-stopped
