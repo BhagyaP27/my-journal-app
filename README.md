@@ -5,29 +5,29 @@ A beautiful, private journal and task management desktop application built with 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 
-## ✨ Features
+## Features
 
-### 📝 Journal
+### Journal
 - **Beautiful writing experience** with a clean, distraction-free interface
 - **Rich text entries** with titles and timestamps
 - **Dark mode design** for comfortable writing
 - **Edit and delete** your entries anytime
 - **Chronologically organized** entries
 
-### ✅ Task Management
+### Task Management
 - **Create and track tasks** with priorities (High, Medium, Low)
 - **Add descriptions** and due dates
 - **Mark tasks as complete** with satisfying checkboxes
 - **Color-coded priorities** for easy scanning
 - **Edit and delete** tasks as needed
 
-### 🔒 Privacy First
+### Privacy First
 - **100% local storage** - all your data stays on YOUR computer
 - **No cloud sync** - no accounts, no servers, no tracking
 - **Offline-ready** - works without internet connection
 - **Private by design** - your thoughts are yours alone
 
-## 🖥️ For Users - Installation
+## For Users - Installation
 
 ### Windows
 1. Download `My Journal Setup 0.1.0.exe` from the releases
@@ -45,7 +45,7 @@ A beautiful, private journal and task management desktop application built with 
 3. Run `My Journal.exe`
 4. No installation needed!
 
-## 💻 For Developers - Setup
+## For Developers - Setup
 
 ### Prerequisites
 - Node.js 18+ installed
