@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, Save } from 'lucide-react';
 
+// Storage abstraction - works in both web and Electron
+const storage = {
+  getItem: async (key) => {
+    if (window.electronStore) {
+      return await window.electronStore.get(key);
+    }
+    return localStorage.getItem(key);
+  },
+  setItem: async (key, value) => {
+    if (window.electronStore) {
+      await window.electronStore.set(key, value);
+    } else {
+      localStorage.setItem(key, value);
+    }
+  }
+};
+
 function App() {
   // Existing journal state
   const [entries, setEntries] = useState([]);
@@ -23,32 +40,41 @@ function App() {
     dueDate: '',
     createdAt: ''
   });
-  const [mode, setMode] = useState('journal'); // 'journal' or 'tasks'
+  const [mode, setMode] = useState('journal');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load entries and tasks when app first loads
   useEffect(() => {
-    // Load journal entries
-    const savedEntries = localStorage.getItem('journalEntries');
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries));
-    }
+    const loadData = async () => {
+      try {
+        // Load journal entries
+        const savedEntries = await storage.getItem('journalEntries');
+        if (savedEntries) {
+          setEntries(JSON.parse(savedEntries));
+        }
 
-    // Load tasks
-    const savedTasks = localStorage.getItem('tasks');
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    }
+        // Load tasks
+        const savedTasks = await storage.getItem('tasks');
+        if (savedTasks) {
+          setTasks(JSON.parse(savedTasks));
+        }
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   // Function to save a journal entry
-  const saveEntry = () => {
-    // Validation: make sure title and content aren't empty
+  const saveEntry = async () => {
     if (!currentEntry.title.trim() || !currentEntry.content.trim()) {
       alert('Please fill in both title and content');
       return;
     }
 
-    // Create the entry object
     const entry = {
       id: currentEntry.id || Date.now().toString(),
       title: currentEntry.title,
@@ -56,7 +82,6 @@ function App() {
       date: currentEntry.date || new Date().toISOString()
     };
 
-    // Update the entries array
     let updatedEntries;
     if (currentEntry.id) {
       updatedEntries = entries.map(e => e.id === entry.id ? entry : e);
@@ -64,28 +89,20 @@ function App() {
       updatedEntries = [...entries, entry];
     }
 
-    // Sort by date (newest first)
     updatedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Save to localStorage
-    localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
-
-    // Update state
+    await storage.setItem('journalEntries', JSON.stringify(updatedEntries));
     setEntries(updatedEntries);
-    
-    // Clear the form
     setCurrentEntry({ id: null, title: '', content: '', date: '' });
-    
-    // Switch to list view
     setView('list');
   };
 
   // Function to delete a journal entry
-  const deleteEntry = (entryId) => {
+  const deleteEntry = async (entryId) => {
     if (!window.confirm('Are you sure you want to delete this journal entry?')) return;
     
     const updatedEntries = entries.filter(e => e.id !== entryId);
-    localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
+    await storage.setItem('journalEntries', JSON.stringify(updatedEntries));
     setEntries(updatedEntries);
     
     if (currentEntry.id === entryId) {
@@ -100,14 +117,12 @@ function App() {
   };
 
   // Function to save a task
-  const saveTask = () => {
-    // Validation
+  const saveTask = async () => {
     if (!currentTask.title.trim()) {
       alert('Please fill in the task title');
       return;
     }
 
-    // Create the task object
     const task = {
       id: currentTask.id || Date.now().toString(),
       title: currentTask.title,
@@ -118,26 +133,17 @@ function App() {
       createdAt: currentTask.createdAt || new Date().toISOString()
     };
 
-    // Update tasks array
     let updatedTasks;
     if (currentTask.id) {
-      // Editing existing task
       updatedTasks = tasks.map(t => t.id === task.id ? task : t);
     } else {
-      // Adding new task
       updatedTasks = [...tasks, task];
     }
 
-    // Sort by creation date (newest first)
     updatedTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    // Save to localStorage
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-
-    // Update state
+    await storage.setItem('tasks', JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
-
-    // Clear form
     setCurrentTask({
       id: null,
       title: '',
@@ -147,26 +153,24 @@ function App() {
       dueDate: '',
       createdAt: ''
     });
-
-    // Switch to task list view
     setView('list');
   };
 
   // Function to toggle task completion
-  const toggleTaskComplete = (taskId) => {
+  const toggleTaskComplete = async (taskId) => {
     const updatedTasks = tasks.map(t => 
       t.id === taskId ? { ...t, completed: !t.completed } : t
     );
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    await storage.setItem('tasks', JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
   };
 
   // Function to delete a task
-  const deleteTask = (taskId) => {
+  const deleteTask = async (taskId) => {
     if (!window.confirm('Are you sure you want to delete this task?')) return;
     
     const updatedTasks = tasks.filter(t => t.id !== taskId);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    await storage.setItem('tasks', JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
   };
 
@@ -175,6 +179,14 @@ function App() {
     setCurrentTask(task);
     setView('write');
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -333,7 +345,6 @@ function App() {
                             {entry.title}
                           </h3>
                           
-                          {/* Edit and Delete Buttons */}
                           <div className="flex gap-2">
                             <button
                               onClick={() => editEntry(entry)}
@@ -474,7 +485,6 @@ function App() {
                         }`}
                       >
                         <div className="flex items-start gap-4">
-                          {/* Checkbox */}
                           <button
                             onClick={() => toggleTaskComplete(task.id)}
                             className={`mt-1 w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${
@@ -486,7 +496,6 @@ function App() {
                             {task.completed && <span className="text-white text-sm">✓</span>}
                           </button>
 
-                          {/* Task Content */}
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-2">
                               <h3 className={`text-xl font-bold ${
@@ -495,7 +504,6 @@ function App() {
                                 {task.title}
                               </h3>
                               
-                              {/* Priority Badge */}
                               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 task.priority === 'high' ? 'bg-red-600/20 text-red-400' :
                                 task.priority === 'medium' ? 'bg-orange-600/20 text-orange-400' :
@@ -523,7 +531,6 @@ function App() {
                             </div>
                           </div>
 
-                          {/* Edit and Delete Buttons */}
                           <div className="flex flex-col gap-2">
                             <button
                               onClick={() => editTask(task)}
